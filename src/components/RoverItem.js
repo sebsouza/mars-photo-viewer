@@ -156,7 +156,7 @@ function RoverItem(props) {
           </ImageList>
           <Pagination
             className="pagination"
-            count={10}
+            count={3}
             page={curiosityPage}
             onChange={handleCuriosityPageChange}
           />

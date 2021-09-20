@@ -1,10 +1,10 @@
 .header {
-  margin: 0 6vw;
+  margin: 1vw 6vw;
 }
 
 #logo {
-  height: 5vh;
-  padding: 0 2vw;
+  width: calc(20px + 2vw);
+  margin: calc(5px + 0.5vw) calc(10px + 1vw);
 }
 
 @media (prefers-reduced-motion: no-preference) {

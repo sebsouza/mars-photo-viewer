@@ -32,7 +32,7 @@ function App() {
         <AppBar position="sticky">
           <Toolbar className="header">
             <img src={logo} alt="Mars" id="logo" />
-            <Typography variant="h5">Mars Photo Viewer</Typography>
+            <Typography variant="h4">Mars Photo Viewer</Typography>
           </Toolbar>
           <AppBar className="tabs" position="sticky" color="secondary">
             <Tabs

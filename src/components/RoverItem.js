@@ -2,20 +2,25 @@ import { useEffect, useState } from "react";
 import {
   Alert,
   Button,
+  CircularProgress,
   FormControl,
+  IconButton,
   InputLabel,
   ImageList,
   ImageListItem,
-  CircularProgress,
+  ListItemIcon,
+  ListItemText,
+  Menu,
   MenuItem,
   Pagination,
   Select,
   Stack,
   TextField,
-  Typography,
 } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import StarIcon from "@mui/icons-material/Star";
 import SaveIcon from "@mui/icons-material/Save";
+import ClearIcon from "@mui/icons-material/Clear";
 
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
@@ -38,6 +43,15 @@ function RoverItem(props) {
   const [formattedEarthDate, setFormattedEarthDate] = useState("");
   const [selectedEarthDate, setSelectedEarthDate] = useState(null);
   const [sol, setSol] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openMenu = Boolean(anchorEl);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   const handlePageChange = (event, value) => {
     setPage(value);
@@ -84,6 +98,7 @@ function RoverItem(props) {
     sessionStorage.removeItem(`earthDate_${props.value}`);
     sessionStorage.removeItem(`sol_${props.value}`);
     sessionStorage.removeItem(`camera_${props.value}`);
+    handleMenuClose();
   };
 
   const handleSaveBookmark = () => {
@@ -95,6 +110,7 @@ function RoverItem(props) {
       localStorage.setItem(`earthDate_${props.value}`, selectedEarthDate);
     if (sol !== "") localStorage.setItem(`sol_${props.value}`, sol);
     if (camera !== "all") localStorage.setItem(`camera_${props.value}`, camera);
+    handleMenuClose();
   };
 
   const handleLoadBookmark = () => {
@@ -122,6 +138,7 @@ function RoverItem(props) {
     setCamera(savedCamera === null ? "all" : savedCamera);
     if (savedCamera !== null)
       sessionStorage.setItem(`camera_${props.value}`, savedCamera);
+    handleMenuClose();
   };
 
   useEffect(() => {
@@ -144,7 +161,6 @@ function RoverItem(props) {
   }, [props.value]);
 
   useEffect(() => {
-    console.log("fetch data");
     setPage(1);
     fetchPhotos();
 
@@ -216,32 +232,46 @@ function RoverItem(props) {
           inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           value={sol}
         />
-      </Stack>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={1}
-        className="forms"
-      >
-        <Button
-          variant="outlined"
-          startIcon={<StarIcon />}
-          color="secondary"
-          onClick={handleSaveBookmark}
+        <IconButton
+          size="large"
+          edge="start"
+          color="inherit"
+          aria-label="menu"
+          sx={{ mr: 2 }}
+          onClick={handleMenuClick}
         >
-          Save
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<SaveIcon />}
-          color="secondary"
-          onClick={handleLoadBookmark}
+          <MenuIcon />
+        </IconButton>
+        <Menu
+          id="basic-menu"
+          anchorEl={anchorEl}
+          open={openMenu}
+          onClose={handleMenuClose}
+          MenuListProps={{
+            "aria-labelledby": "basic-button",
+          }}
         >
-          Load
-        </Button>
-        <Button variant="outlined" onClick={handleResetFilters}>
-          Reset
-        </Button>
+          <MenuItem onClick={handleSaveBookmark}>
+            <ListItemIcon>
+              <StarIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Save Filter</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={handleLoadBookmark}>
+            <ListItemIcon>
+              <SaveIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Load Filter</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={handleResetFilters}>
+            <ListItemIcon>
+              <ClearIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Reset Filter</ListItemText>
+          </MenuItem>
+        </Menu>
       </Stack>
+
       {loading ? (
         <CircularProgress className="progress" />
       ) : (

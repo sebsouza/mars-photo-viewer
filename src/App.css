@@ -37,6 +37,8 @@
 
 .forms {
   margin: 2vh 0 0 0;
+  flex-grow: 1;
+  justify-content: space-between;
 }
 
 #camera-selector {

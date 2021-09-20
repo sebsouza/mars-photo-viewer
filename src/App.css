@@ -1,30 +1,47 @@
 .header {
-  margin: 0 8vw;
+  margin: 0 6vw;
+}
+
+#logo {
+  height: 5vh;
+  padding: 0 2vw;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .tabs {
-  background-color: #fff;
   border-bottom: 1;
   border-color: "divider";
   justify-content: center;
-  padding: 0 10vw;
+  padding: 0 4vw;
 }
 
 .main {
   flex-grow: 1;
   text-align: center;
-  padding: 0 8vw;
+  padding: 0 6vw;
 }
 
 .forms {
-  display: flex;
-  justify-content: space-between;
-  margin: 0 2vw;
+  margin: 2vh 0 0 0;
 }
 
 #camera-selector {
   text-align: left;
-  min-width: 15vw;
+  width: 20vw;
 }
 
 .alert {

@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { AppBar, Box, Tab, Tabs, Toolbar, Typography } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 
 import RoverItem from "./components/RoverItem";
-
+import theme from "./theme";
 import "./App.css";
-import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import logo from "./logo.png";
+
+import roverData from "./data/roverData";
 
 function App() {
   const [selectedRover, setSelectedRover] = useState(0);
@@ -21,26 +26,36 @@ function App() {
   }
 
   return (
-    <Box className="app">
-      <AppBar position="sticky">
-        <Toolbar className="header">
-          <Typography variant="h5">Mars Photo Viewer</Typography>
-        </Toolbar>
-        <Box className="tabs">
-          <Tabs
-            value={selectedRover}
-            onChange={handleRoverChange}
-            aria-label="rover selection tabs"
-          >
-            <Tab label="Curiosity" {...a11yProps(0)} />
-            <Tab label="Opportunity" {...a11yProps(1)} />
-            <Tab label="Spirit" {...a11yProps(2)} />
-          </Tabs>
-        </Box>
-      </AppBar>
-
-      <RoverItem value={selectedRover} />
-    </Box>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box className="app">
+        <AppBar position="sticky">
+          <Toolbar className="header">
+            <img src={logo} alt="Mars" id="logo" />
+            <Typography variant="h5">Mars Photo Viewer</Typography>
+          </Toolbar>
+          <AppBar className="tabs" position="sticky" color="secondary">
+            <Tabs
+              value={selectedRover}
+              onChange={handleRoverChange}
+              aria-label="rover selection tabs"
+              indicatorColor="primary"
+              textColor="inherit"
+              variant="scrollable"
+              scrollButtons
+              allowScrollButtonsMobile
+            >
+              {roverData.map((rover, index) => {
+                return (
+                  <Tab key={index} label={rover.name} {...a11yProps(index)} />
+                );
+              })}
+            </Tabs>
+          </AppBar>
+        </AppBar>
+        <RoverItem value={selectedRover} />
+      </Box>
+    </ThemeProvider>
   );
 }
 

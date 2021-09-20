@@ -41,7 +41,7 @@
 
 #camera-selector {
   text-align: left;
-  width: 20vw;
+  min-width: 20vw;
 }
 
 .alert {

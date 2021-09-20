@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Button,
   FormControl,
   InputLabel,
@@ -11,6 +12,7 @@ import {
   Select,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import SaveIcon from "@mui/icons-material/Save";
@@ -30,6 +32,7 @@ function RoverItem(props) {
   const [loading, setLoading] = useState(true);
   const [roverId, setRoverId] = useState(props.value);
   const [photosData, setPhotosData] = useState([]);
+  const [emptyData, setEmptyData] = useState(false);
   const [page, setPage] = useState(null);
   const [camera, setCamera] = useState("all");
   const [formattedEarthDate, setFormattedEarthDate] = useState("");
@@ -43,50 +46,65 @@ function RoverItem(props) {
 
   const handleCameraChange = (event) => {
     setLoading(true);
+    setPage(1);
+    sessionStorage.removeItem(`page_${props.value}`);
     setCamera(event.target.value);
     sessionStorage.setItem(`camera_${props.value}`, event.target.value);
   };
 
   const handleEarthDateChange = (value) => {
     setLoading(true);
+    setPage(1);
+    sessionStorage.removeItem(`page_${props.value}`);
+    sessionStorage.removeItem(`sol_${props.value}`);
     setSol("");
     setSelectedEarthDate(value);
     setFormattedEarthDate(formatDate(value));
-    sessionStorage.removeItem(`sol_${props.value}`);
     sessionStorage.setItem(`earthDate_${props.value}`, value);
   };
 
   const handleSolChange = (event) => {
     setLoading(true);
+    setPage(1);
+    sessionStorage.removeItem(`page_${props.value}`);
+    sessionStorage.removeItem(`earthDate_${props.value}`);
     setFormattedEarthDate("");
     setSelectedEarthDate(null);
     setSol(event.target.value);
-    sessionStorage.removeItem(`earthDate_${props.value}`);
     sessionStorage.setItem(`sol_${props.value}`, event.target.value);
   };
 
   const handleResetFilters = () => {
+    setPage(1);
     setSol("");
     setFormattedEarthDate("");
     setSelectedEarthDate(null);
     setCamera("all");
+    sessionStorage.removeItem(`page_${props.value}`);
     sessionStorage.removeItem(`earthDate_${props.value}`);
     sessionStorage.removeItem(`sol_${props.value}`);
     sessionStorage.removeItem(`camera_${props.value}`);
   };
 
   const handleSaveBookmark = () => {
+    localStorage.removeItem(`earthDate_${props.value}`);
+    localStorage.removeItem(`sol_${props.value}`);
+    localStorage.removeItem(`camera_${props.value}`);
+
     if (selectedEarthDate !== null)
       localStorage.setItem(`earthDate_${props.value}`, selectedEarthDate);
-    else sessionStorage.removeItem(`earthDate_${props.value}`);
     if (sol !== "") localStorage.setItem(`sol_${props.value}`, sol);
-    else sessionStorage.removeItem(`sol_${props.value}`);
     if (camera !== "all") localStorage.setItem(`camera_${props.value}`, camera);
-    else sessionStorage.removeItem(`camera_${props.value}`);
   };
 
   const handleLoadBookmark = () => {
     setPage(1);
+
+    sessionStorage.removeItem(`page_${props.value}`);
+    sessionStorage.removeItem(`earthDate_${props.value}`);
+    sessionStorage.removeItem(`sol_${props.value}`);
+    sessionStorage.removeItem(`camera_${props.value}`);
+
     const savedEarthDate = localStorage.getItem(`earthDate_${props.value}`);
     setSelectedEarthDate(savedEarthDate);
     setFormattedEarthDate(
@@ -132,16 +150,6 @@ function RoverItem(props) {
 
     async function fetchPhotos() {
       var photosData = [];
-      console.log(
-        `https://api.nasa.gov/mars-photos/api/v1/rovers/${roverData[roverId].name}/` +
-          (formattedEarthDate !== ""
-            ? `photos?earth_date=${formattedEarthDate}&`
-            : sol !== ""
-            ? `photos?sol=${sol}&`
-            : `latest_photos?`) +
-          `api_key=${apiKey}` +
-          (camera !== "all" ? `&camera=${camera}` : "")
-      );
       const res = await fetch(
         `https://api.nasa.gov/mars-photos/api/v1/rovers/${roverData[roverId].name}/` +
           (formattedEarthDate !== ""
@@ -160,6 +168,7 @@ function RoverItem(props) {
       ).forEach(([key, value]) =>
         photosData.push({ img: value.img_src, title: value.id })
       );
+      setEmptyData(photosData.length === 0 ? true : false);
       setPhotosData(photosData);
       setLoading(false);
     }
@@ -167,7 +176,11 @@ function RoverItem(props) {
 
   return (
     <TabPanel value={props.value} index={props.value} className="main">
-      <Stack direction="row" spacing={1} className="forms">
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1}
+        className="forms"
+      >
         <FormControl id="camera-selector">
           <InputLabel id="select-label">Camera</InputLabel>
           <Select
@@ -204,7 +217,11 @@ function RoverItem(props) {
           value={sol}
         />
       </Stack>
-      <Stack direction="row" spacing={1} className="forms">
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1}
+        className="forms"
+      >
         <Button
           variant="outlined"
           startIcon={<StarIcon />}
@@ -228,31 +245,41 @@ function RoverItem(props) {
       {loading ? (
         <CircularProgress className="progress" />
       ) : (
-        <Stack spacing={2}>
-          <ImageList
-            sx={{ width: "auto", height: "auto" }}
-            cols={5}
-            rowHeight={"auto"}
-          >
-            {photosData.slice(25 * (page - 1), 25 * page).map((item) => (
-              <ImageListItem key={item.img}>
-                <img
-                  src={`${item.img}?w=164&h=164&fit=crop&auto=format`}
-                  srcSet={`${item.img}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                  alt={item.title}
-                  loading="lazy"
-                />
-              </ImageListItem>
-            ))}
-          </ImageList>
-          <Pagination
-            className="pagination"
-            siblingCount={2}
-            count={Math.ceil(photosData.length / 25)}
-            page={page}
-            onChange={handlePageChange}
-          />
-        </Stack>
+        <div>
+          {emptyData ? (
+            <div className="alert">
+              <Alert variant="outlined" severity="error">
+                Inexisting photos for selected Earth Day/Sol
+              </Alert>
+            </div>
+          ) : (
+            <Stack spacing={2}>
+              <ImageList
+                sx={{ width: "auto", height: "auto" }}
+                cols={5}
+                rowHeight={"auto"}
+              >
+                {photosData.slice(25 * (page - 1), 25 * page).map((item) => (
+                  <ImageListItem key={item.img}>
+                    <img
+                      src={`${item.img}?w=164&h=164&fit=crop&auto=format`}
+                      srcSet={`${item.img}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                      alt={item.title}
+                      loading="lazy"
+                    />
+                  </ImageListItem>
+                ))}
+              </ImageList>
+              <Pagination
+                className="pagination"
+                siblingCount={2}
+                count={Math.ceil(photosData.length / 25)}
+                page={page}
+                onChange={handlePageChange}
+              />
+            </Stack>
+          )}
+        </div>
       )}
     </TabPanel>
   );
